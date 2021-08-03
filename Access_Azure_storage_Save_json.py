@@ -1,5 +1,3 @@
-pip install azure.storage.blob
-
 import os
 from azure.storage.blob import BlobServiceClient
 import sys
