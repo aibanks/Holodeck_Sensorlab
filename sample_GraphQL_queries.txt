@@ -1,0 +1,24 @@
+
+query {
+  e4Sensors (query: {stream_type: "E4_Gsr"}) {
+    Participant
+		Participant_ID
+		Value
+		dateTime
+		dateTime_Unix
+		stream_type
+  }
+}
+
+
+
+{
+  e4Sensors(query: {Value_lt: 10}) {
+    Participant
+    Participant_ID
+    Value
+    dateTime
+    dateTime_Unix
+    stream_type
+  }
+}
