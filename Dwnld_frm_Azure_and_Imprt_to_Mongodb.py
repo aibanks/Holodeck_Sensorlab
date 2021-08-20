@@ -6,42 +6,62 @@ from pymongo import MongoClient
 
 # Define function to build nested json 
 def make_nested_json(list_of_json):
-    participant_name = list_of_json[0]['Participant']
-    participant_ID = list_of_json[0]['Participant_ID']
-    session_ID = list_of_json[0]['Session_ID']
-    streams_and_data = [
+    sessions = [
         {
-            'stream_type': list_of_json[0]['stream_type'], 
-            'data': []
+            'Session_ID': list_of_json[0]['Session_ID'],
+            'Participant_ID': list_of_json[0]['Participant_ID'],
+            'Participant': list_of_json[0]['Participant'],
+            'Streams' : [
+                {
+                    'stream_type': list_of_json[0]['stream_type'],
+                    'data': []
+                }
+            ]
         }
     ]
+    
     for i in range(len(list_of_json)):
-        streams_in_dict = [a_dict["stream_type"] for a_dict in streams_and_data]
+        sessions_in_dict = [a_dict["Session_ID"] for a_dict in sessions]
+        indexed_sessionID = list_of_json[i]['Session_ID']
         indexed_stream_type = list_of_json[i]['stream_type']
-        if indexed_stream_type in streams_in_dict:                   
+        if indexed_sessionID in sessions_in_dict:
             pass
         else:
-            streams_and_data.append(
+            sessions.append(
+                {
+                    'Session_ID': indexed_sessionID,
+                    'Participant_ID': list_of_json[i]['Participant_ID'],
+                    'Participant': list_of_json[i]['Participant'],
+                    'Streams': [
+                        {
+                            'stream_type': indexed_stream_type,
+                            'data': []
+                        }
+                    ]
+                }
+            )
+        sessions_in_dict = [a_dict["Session_ID"] for a_dict in sessions]
+        n_session = sessions_in_dict.index(indexed_sessionID)
+        streams_in_session = [a_dict["stream_type"] for a_dict in sessions[n_session]['Streams']]
+        if indexed_stream_type in streams_in_session:
+            pass
+        else:
+            sessions[n_session]['Streams'].append(
                 {
                     'stream_type': indexed_stream_type,
                     'data': []
                 }
             )
-        streams_in_dict = [a_dict["stream_type"] for a_dict in streams_and_data]
-        n = streams_in_dict.index(indexed_stream_type)
-        streams_and_data[n]['data'].append(
+        streams_in_session = [a_dict["stream_type"] for a_dict in sessions[n_session]['Streams']]
+        n_stream = streams_in_session.index(indexed_stream_type)
+        sessions[n_session]['Streams'][n_stream]['data'].append(
             {
                 'Value': list_of_json[i]['Value'],
                 'dateTime': list_of_json[i]['dateTime_Unix']
             }
         )
-    nested_json = {
-        'Session_ID': session_ID,
-        'Participant_ID': participant_ID,
-        'Participant': participant_name,
-        'Streams': streams_and_data
-    } 
-    return nested_json  
+    
+    return sessions
 
 blob_service_client_instance = BlobServiceClient(account_url="https://uaholodecksensorlab.blob.core.windows.net",credential="GX+Fn1hVo3RDWRGuCxMAVDVFA/maCM2NdGx4Kffv4tWnG6DU8C1NOVH5Rv694e3HVNCmlinkeAKMgnXBvsr7nA==")
 container = ContainerClient.from_connection_string(conn_str=os.environ.get("DefaultEndpointsProtocol=https;AccountName=uaholodecksensorlab;AccountKey=GX+Fn1hVo3RDWRGuCxMAVDVFA/maCM2NdGx4Kffv4tWnG6DU8C1NOVH5Rv694e3HVNCmlinkeAKMgnXBvsr7nA==;EndpointSuffix=core.windows.net"), container_name="container2")
