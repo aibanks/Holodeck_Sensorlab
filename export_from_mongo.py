@@ -19,3 +19,5 @@ data = {'info':docs}
 jsonFile = open("data.json", "w")
 jsonFile.write(json.dumps(data))
 jsonFile.close()
+
+print('Successfully downloaded data.json')

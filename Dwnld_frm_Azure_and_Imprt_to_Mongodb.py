@@ -2,6 +2,7 @@ import time
 from azure.storage.blob import ContainerClient
 from azure.storage.blob import BlobServiceClient
 import json
+import os
 from pymongo import MongoClient
 
 # Define function to build nested json 
@@ -64,7 +65,7 @@ def make_nested_json(list_of_json):
     return sessions
 
 blob_service_client_instance = BlobServiceClient(account_url="https://uaholodecksensorlab.blob.core.windows.net",credential="GX+Fn1hVo3RDWRGuCxMAVDVFA/maCM2NdGx4Kffv4tWnG6DU8C1NOVH5Rv694e3HVNCmlinkeAKMgnXBvsr7nA==")
-container = ContainerClient.from_connection_string(conn_str=os.environ.get("DefaultEndpointsProtocol=https;AccountName=uaholodecksensorlab;AccountKey=GX+Fn1hVo3RDWRGuCxMAVDVFA/maCM2NdGx4Kffv4tWnG6DU8C1NOVH5Rv694e3HVNCmlinkeAKMgnXBvsr7nA==;EndpointSuffix=core.windows.net"), container_name="container2")
+container = ContainerClient.from_connection_string(conn_str="DefaultEndpointsProtocol=https;AccountName=uaholodecksensorlab;AccountKey=GX+Fn1hVo3RDWRGuCxMAVDVFA/maCM2NdGx4Kffv4tWnG6DU8C1NOVH5Rv694e3HVNCmlinkeAKMgnXBvsr7nA==;EndpointSuffix=core.windows.net", container_name="container2")
 
 new_files = []
 all_files = []
