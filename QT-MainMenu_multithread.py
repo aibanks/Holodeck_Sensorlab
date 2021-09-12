@@ -13,34 +13,6 @@ import time
 from random import randint
 
 
-class ReadingThread(QtCore.QObject):
-    output = QtCore.pyqtSignal(object)
-
-    def __init__(self, directory, interval, ctrl):
-        QtCore.QObject.__init__(self)
-        self.ctrl = ctrl # dict with your control var
-        self.directory = directory
-        self.refreshtime = interval 
-
-    def run(self):
-        print('Entered run in worker thread')
-        print('id of ctrl in worker:', id(self.ctrl))
-        self.ctrl['break'] = False
-
-        while True:
-            outstring=self.read_last_from_logfile()
-            self.output.emit(outstring)
-            
-            # checking our control variable
-            if self.ctrl['break']:
-                print('break because flag raised')
-                # might emit finished signal here for proper cleanup
-                break # or in this case: return
-                response = s.recv(bufferSize).decode("utf-8")
-                print(response)
-
-            time.sleep(self.refreshtime)
-
 class Example(QWidget):
 
     def __init__(self):
@@ -57,7 +29,7 @@ class Example(QWidget):
 
         deviceconnectb = QPushButton('Connect to Device', self)
         deviceconnectb.setFont(QFont('Arial', 20))
-        deviceconnectb.clicked.connect(self.printMessage)
+        deviceconnectb.clicked.connect(self.deviceconnectb_pressed)  #self.printMessage)
 
         startb = QPushButton('Start Data Collection', self)
         startb.setFont(QFont('Arial', 20))
@@ -109,6 +81,11 @@ class Example(QWidget):
         source = self.sender()
         print(source.text())
 
+    def deviceconnectb_pressed(self):
+
+
+
+
     def printMessage(self):
         source = self.sender()
         print(f'Pressed: {source.text()}')
@@ -120,7 +97,7 @@ class Example(QWidget):
                 self.text = "Connecting to device...\n...\n...\nConnected to device. Press 'Start Data Collection' to begin data collection."
                 #connect()
                 time.sleep(1)
-                subscribe_to_data()
+                #subscribe_to_data()
                 status[0] = 1
             elif status == [1, 0]: #Device already connected and data collection not started
                 self.text = "Already connected to device. Press 'Start Data Collection' to begin data collection."

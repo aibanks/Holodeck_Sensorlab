@@ -49,16 +49,6 @@ class ReadingThread(QtCore.QObject):
         # This simply stops the timer. The timer is still "alive" after.
         self.poller.stop()
 
-    # OR substitute polling_start and polling_stop by toggling like this:
-    def polling_toggle(self):
-        poller_active = self.poller.isActive()
-        if poller_active:
-            # stop polling
-            self.poller.stop()
-        else:
-            # start polling
-            self.poller.start(self.refreshtime)
-
     def device_connect(self):
         connect()
         time.sleep(1)
@@ -66,9 +56,6 @@ class ReadingThread(QtCore.QObject):
     
     def device_disconnect(self):
         disconnect()
-
-
-
 
 class Example(QWidget):
     emit_connect = QtCore.pyqtSignal()
@@ -81,7 +68,31 @@ class Example(QWidget):
 
         self.initUI()
         self.init_worker()
+        self.takeinputs()
 
+    def takeinputs(self):
+        Participant_name, done1 = QInputDialog.getText(
+             self, 'Input Dialog', "Enter Participant's name:") 
+  
+        Participant_ID, done2 = QInputDialog.getInt(
+           self, 'Input Dialog', "Enter Participant's ID #:")  
+        
+        Researcher_name, done3 = QInputDialog.getText(
+              self, 'Input Dialog', "Enter Researcher's name:")
+  
+        sensors =['Empatica E4', 'Shimmer']
+        selected_sensor, done4 = QInputDialog.getItem(
+          self, 'Input Dialog', "Select the sensor you're using:", sensors)
+  
+        if done1 and done2 and done3 and done4 :
+             # Showing confirmation message along
+             # with information provided by user. 
+             self.label_metadata.setText('Information stored Successfully\nParticipant Name: '
+                                 +str(Participant_name)+'('+str(Participant_ID)+')'+'\n'+'Researcher Name: '
+                                 +str(Researcher_name)+'\nSelected Sensor: '+str(selected_sensor))
+             print(Participant_name)
+             self.metadata = [Participant_name, Participant_ID, Researcher_name, selected_sensor]
+             print(self.metadata)
 
     def init_worker(self):
         self.thread = QtCore.QThread()
@@ -116,8 +127,10 @@ class Example(QWidget):
 
     def initUI(self):
 
-        hbox = QHBoxLayout()
+        hbox1 = QHBoxLayout()
+        hbox2 = QHBoxLayout()
         vbox = QVBoxLayout()
+        
 
         self.col = QColor(0, 0, 0)
 
@@ -140,12 +153,12 @@ class Example(QWidget):
         devicedisconnectb.clicked.connect(self.emit_disconnect)
         #devicedisconnectb.setEnabled(False)
 
-        hbox.addWidget(deviceconnectb)
-        hbox.addWidget(startb)
-        hbox.addWidget(stopb)
-        hbox.addWidget(devicedisconnectb)
+        hbox1.addWidget(deviceconnectb)
+        hbox1.addWidget(startb)
+        hbox1.addWidget(stopb)
+        hbox1.addWidget(devicedisconnectb)
 
-        vbox.addLayout(hbox)
+        #vbox.addLayout(hbox)
         #vbox.addWidget(self.square)
 
         self.setLayout(vbox)
@@ -154,10 +167,21 @@ class Example(QWidget):
         global status
         status = [0, 0] #initial status, not connected, not started
 
-        self.label = QLabel(self.text, self)
-        self.label.setFont(QFont('Arial', 14))
+        self.label_status = QLabel(self.text, self)
+        self.label_status.setFont(QFont('Arial', 14))
         #grid = QGridLayout()
-        vbox.addWidget(self.label) #Qt.AlignTop)
+        #hbox2.addWidget(self.label_status) #Qt.AlignTop)
+
+
+        self.label_metadata = QLabel(self)
+        self.label_metadata.setText("")
+        self.label_metadata.setFont(QFont('Arial', 14))
+        #self.label_metadata.setAlignment(QtCore.Qt.AlignRight)
+        hbox2.addWidget(self.label_metadata)
+        hbox2.addWidget(self.label_status)
+
+        vbox.addLayout(hbox1)
+        vbox.addLayout(hbox2)
 
         #self.setFixedWidth(1500)
         #self.setFixedHeight(500)
