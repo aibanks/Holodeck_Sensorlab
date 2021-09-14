@@ -163,11 +163,12 @@ class Example(QWidget):
 
         self.setLayout(vbox)
 
-        self.text = 'First establish connection to device'
-        global status
-        status = [0, 0] #initial status, not connected, not started
+        #self.text = 'First establish connection to device'
+        #global status
+        self.status = [0, 0] #initial status, not connected, not started
 
-        self.label_status = QLabel(self.text, self)
+        self.label_status = QLabel(self)
+        self.label_status.setText("Ensure the device is connected to the E4 Streaming Server,\nthen press 'Connect' to establish connection with the device.")
         self.label_status.setFont(QFont('Arial', 14))
         #grid = QGridLayout()
         #hbox2.addWidget(self.label_status) #Qt.AlignTop)
