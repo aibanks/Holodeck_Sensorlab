@@ -58,6 +58,8 @@ class ReadingThread(QtCore.QObject):
         if "R device_connect OK" in con_response:
             print('Connection Response matched for successful connection...')
             self.output.emit([1,0])
+        else:
+            print('Bad connection response on connection attempt')
 
     def device_disconnect(self):
         disconnect()
@@ -139,6 +141,13 @@ class Example(QWidget):
         self.status = status
         print("Status updated to ", self.status)
 
+    def button_pressed_connect(self):
+        if self.status == [0,0]:
+            print('connect button pressed while status == [0,0]')
+            self.emit_connect.emit()
+        else:
+            print('Connection Button Pressed but Already Connected')
+
     def initUI(self):
 
         hbox1 = QHBoxLayout()
@@ -150,7 +159,7 @@ class Example(QWidget):
 
         deviceconnectb = QPushButton('Connect to Device', self)
         deviceconnectb.setFont(QFont('Arial', 20))
-        deviceconnectb.clicked.connect(self.emit_connect)  #self.printMessage)
+        deviceconnectb.clicked.connect(self.button_pressed_connect)  #self.printMessage)
 
         startb = QPushButton('Start Data Collection', self)
         startb.setFont(QFont('Arial', 20))
@@ -219,8 +228,8 @@ bvp = True     # Blood Volume Pulse
 gsr = True      # Galvanic Skin Response (Electrodermal Activity)
 tmp = True      # Temperature
 ibi = True      # Interbeat Interval and Heartbeat
-bat = False      # Device Battery
-tag = False     # Tag taken from the device (by pressing the button)
+bat = True      # Device Battery
+tag = True     # Tag taken from the device (by pressing the button)
 
 serverAddress = '127.0.0.1'
 serverPort = 28000
