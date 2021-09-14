@@ -40,6 +40,7 @@ class ReadingThread(QtCore.QObject):
 
     def polling_start(self):
         # slot to call upon when timer should start the routine.
+        self.output.emit([1,1])
         self.poller.start(self.refreshtime)
         # the argument specifies the milliseconds the timer waits in between
         # calls of the polling routine. If you want to emulate the polling
@@ -48,14 +49,19 @@ class ReadingThread(QtCore.QObject):
     def polling_stop(self):
         # This simply stops the timer. The timer is still "alive" after.
         self.poller.stop()
+        self.output.emit([1,0])
 
     def device_connect(self):
-        connect()
+        con_response = connect()
         time.sleep(1)
         subscribe_to_data()
-    
+        if "R device_connect OK" in con_response:
+            print('Connection Response matched for successful connection...')
+            self.output.emit([1,0])
+
     def device_disconnect(self):
         disconnect()
+        self.output.emit([0,0])
 
 class Example(QWidget):
     emit_connect = QtCore.pyqtSignal()
@@ -100,7 +106,11 @@ class Example(QWidget):
         self.worker = ReadingThread()
         self.worker.moveToThread(self.thread)
 
-        self.worker.output.connect(self.print_new_value) 
+        ## Communicate a value across threads
+        #self.worker.output.connect(self.print_new_value) 
+
+        self.worker.output.connect(self.status_update)
+
         self.emit_start.connect(self.worker.polling_start)
         self.emit_stop.connect(self.worker.polling_stop)
         self.emit_connect.connect(self.worker.device_connect)
@@ -122,8 +132,12 @@ class Example(QWidget):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
 
-    def print_new_value(self, value):
-        print(value)
+    #def print_new_value(self, value):
+    #    print(value)
+
+    def status_update(self, status):
+        self.status = status
+        print("Status updated to ", self.status)
 
     def initUI(self):
 
@@ -230,13 +244,16 @@ def connect():
 
     print("Connecting to device")
     s.send(("device_connect " + deviceID + "\r\n").encode())
-    response = s.recv(bufferSize)
-    print(response.decode("utf-8"))
+    connection_response = s.recv(bufferSize)
+    connection_response = connection_response.decode("utf-8")
+    print(connection_response)
 
     print("Pausing data receiving")
     s.send("pause ON\r\n".encode())
     response = s.recv(bufferSize)
     print(response.decode("utf-8"))
+
+    return connection_response
 #connect()
 
 #time.sleep(1)
@@ -287,7 +304,7 @@ def subscribe_to_data():
 
 def disconnect():
     print("Disconnecting device")
-    s.send("device_disconnect\r\n".encode())
+    s.send("device_disconnect\r\n".encode())     
 
 def stream():
     response = s.recv(bufferSize).decode("utf-8")
