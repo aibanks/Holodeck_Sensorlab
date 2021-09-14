@@ -40,6 +40,7 @@ class ReadingThread(QtCore.QObject):
 
     def polling_start(self):
         # slot to call upon when timer should start the routine.
+        subscribe_to_data()
         self.output.emit([1,1])
         self.poller.start(self.refreshtime)
         # the argument specifies the milliseconds the timer waits in between
@@ -49,12 +50,12 @@ class ReadingThread(QtCore.QObject):
     def polling_stop(self):
         # This simply stops the timer. The timer is still "alive" after.
         self.poller.stop()
+        # create an unsubscribe() function and use it here
+        unsubscribe_to_data()
         self.output.emit([1,0])
 
     def device_connect(self):
         con_response = connect()
-        time.sleep(1)
-        subscribe_to_data()
         if "R device_connect OK" in con_response:
             print('Connection Response matched for successful connection...')
             self.output.emit([1,0])
@@ -121,10 +122,16 @@ class Example(QWidget):
         self.thread.start()
 
     def start_polling(self):
-        self.emit_start.emit()
+        if self.status == [1,0]:
+            self.emit_start.emit()
+        else:
+            print('Status must be [1,0], but its at: ', self.status)
 
     def stop_polling(self):
-        self.emit_stop.emit()
+        if self.status == [1,1]:
+            self.emit_stop.emit()
+        else:
+            print('Status must be [1,1], but its at: ', self.status)
 
     def finish_worker(self):
         # for sake of completeness: call upon this method if you want the
@@ -147,6 +154,13 @@ class Example(QWidget):
             self.emit_connect.emit()
         else:
             print('Connection Button Pressed but Already Connected')
+
+    def button_pressed_disconnect(self):
+        if self.status == [1,0]:
+            print('Disconnect button pressed while status == ', self.status)
+            self.emit_disconnect.emit()
+        else:
+            print('Status must be at [1,0] to disconnect, but status is:', self.status)
 
     def initUI(self):
 
@@ -173,7 +187,7 @@ class Example(QWidget):
 
         devicedisconnectb = QPushButton('Disconnect from Device', self)
         devicedisconnectb.setFont(QFont('Arial', 20))
-        devicedisconnectb.clicked.connect(self.emit_disconnect)
+        devicedisconnectb.clicked.connect(self.button_pressed_disconnect)
         #devicedisconnectb.setEnabled(False)
 
         hbox1.addWidget(deviceconnectb)
@@ -324,6 +338,44 @@ def stream():
         reconnect()
     #samples = response.split("\r\n")
     #print(samples)
+
+def unsubscribe_to_data():
+    global acc, bvp, gsr, tmp, ibi, bat, tag
+    if acc:
+        print("Unsubscribing to ACC")
+        s.send(("device_subscribe " + 'acc' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if bvp:
+        print("Unsubscribing to BVP")
+        s.send(("device_subscribe " + 'bvp' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if gsr:
+        print("Unsubscribing to GSR")
+        s.send(("device_subscribe " + 'gsr' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if tmp:
+        print("Unsubscribing to Temp")
+        s.send(("device_subscribe " + 'tmp' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if ibi:
+        print("Unsubscribing to IBI")
+        s.send(("device_subscribe " + 'ibi' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if bat:
+        print("Unsubscribing to Batt")
+        s.send(("device_subscribe " + 'bat' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
+    if tag:
+        print("Unsubscribing to Tag")
+        s.send(("device_subscribe " + 'tag' + " OFF\r\n").encode())
+        response = s.recv(bufferSize)
+        print(response.decode("utf-8"))
 
 
 def main():
