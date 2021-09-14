@@ -72,22 +72,22 @@ class Example(QWidget):
 
     def takeinputs(self):
         Participant_name, done1 = QInputDialog.getText(
-             self, 'Input Dialog', "Enter Participant's name:") 
-  
+             self, 'Input Dialog', "<html style='font-size:12pt;'>Enter Participant's name:<br></html>")
+
         Participant_ID, done2 = QInputDialog.getInt(
-           self, 'Input Dialog', "Enter Participant's ID #:")  
+           self, 'Input Dialog', "<html style='font-size:12pt;'>Enter Participant's ID #:<br></html>")  
         
         Researcher_name, done3 = QInputDialog.getText(
-              self, 'Input Dialog', "Enter Researcher's name:")
+              self, 'Input Dialog', "<html style='font-size:12pt;'>Enter Researcher's name:<br></html>")
   
         sensors =['Empatica E4', 'Shimmer']
         selected_sensor, done4 = QInputDialog.getItem(
-          self, 'Input Dialog', "Select the sensor you're using:", sensors)
+          self, 'Input Dialog', "<html style='font-size:12pt;'>Select the sensor you're using:<br></html>", sensors)
   
         if done1 and done2 and done3 and done4 :
              # Showing confirmation message along
              # with information provided by user. 
-             self.label_metadata.setText('Information stored Successfully\nParticipant Name: '
+             self.label_metadata.setText('Session Information\nParticipant Name: '
                                  +str(Participant_name)+'('+str(Participant_ID)+')'+'\n'+'Researcher Name: '
                                  +str(Researcher_name)+'\nSelected Sensor: '+str(selected_sensor))
              print(Participant_name)
