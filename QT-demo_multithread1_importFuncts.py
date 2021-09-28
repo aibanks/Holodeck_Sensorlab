@@ -9,7 +9,7 @@ import time
 from datetime import datetime 
 import requests
 import json
-#from azure.eventhub import EventHubProducerClient, EventData
+from azure.eventhub import EventHubProducerClient, EventData
 import os
 import time
 from random import randint
@@ -28,6 +28,7 @@ class ReadingThread(QtCore.QObject):
         #self.directory = directory
         self.refreshtime = 100
 
+        self.startTime = time.time()
         # setting up a timer to substitute the need of a while loop for a 
         # repetitive task
         self.poller = QTimer(self)
@@ -38,12 +39,14 @@ class ReadingThread(QtCore.QObject):
         # this is what's inside of your while loop i.e. your repetitive task
         #outstring = "test"
         #self.output.emit(outstring)
-        self.device.stream()
+        self.device.stream(self.metadata['ParticipantName'], 
+            self.metadata['ParticipantID'], self.metadata['ParticipantID'] +"_" + str(startTime))
 
     def polling_start(self):
         # slot to call upon when timer should start the routine.
         self.device.subscribe_to_data()
         self.output.emit([1,1])
+        
         self.poller.start(self.refreshtime)
         # the argument specifies the milliseconds the timer waits in between
         # calls of the polling routine. If you want to emulate the polling
@@ -93,7 +96,7 @@ class Example(QWidget):
         Participant_name, done1 = QInputDialog.getText(
              self, 'Input Dialog', "<html style='font-size:12pt;'>Enter Participant's name:<br></html>")
 
-        Participant_ID, done2 = QInputDialog.getInt(
+        Participant_ID, done2 = QInputDialog.getText(
            self, 'Input Dialog', "<html style='font-size:12pt;'>Enter Participant's ID #:<br></html>")  
         
         Researcher_name, done3 = QInputDialog.getText(
@@ -276,6 +279,11 @@ class Example(QWidget):
         #self.move(1000, 500)
         self.setWindowTitle('Data Streaming Menu')
         self.show()
+
+participant = "Tony Banks"    # need to generalize
+participant_ID = "001"
+startTime = time.time()
+session_ID = participant_ID +"_" + str(startTime)
 
 def resize_max_lines(text_str):
     '''

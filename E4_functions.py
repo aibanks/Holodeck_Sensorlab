@@ -4,17 +4,17 @@ import time
 from datetime import datetime 
 import requests
 import json
-#from azure.eventhub import EventHubProducerClient, EventData
+from azure.eventhub import EventHubProducerClient, EventData
 import os
 import time
 from random import randint
 
 #participant = input("Participant's Full Name: ")
 #participant_ID = input("Participant ID: ")
-participant = "Tony Banks"
-participant_ID = "001"
-startTime = time.time()
-session_ID = participant_ID +"_" + str(startTime)
+#participant = "Tony Banks"    # need to generalize
+#participant_ID = "001"         # need to generalize
+#startTime = time.time()
+#session_ID = participant_ID +"_" + str(startTime)
 
 # SELECT DATA TO STREAM
 acc = True      # 3-axis acceleration
@@ -114,12 +114,12 @@ def reconnect():
     connect()
     subscribe_to_data()  
 
-def convert_to_json(sample):
+def convert_to_json(sample, participant, participant_ID, session_ID):
     stream_type = sample.split()[0]
     if stream_type == "E4_Acc":
         new_timestamp = datetime.fromtimestamp(float(sample.split()[1])).isoformat(sep=' ', timespec='milliseconds') #recent update to include milliseconds
         new_timestamp_unix = sample.split()[1] #recent update to include unix timestamp to make querying easier
-        new_data = [int(samples[i].split()[2].replace(',','.')), int(samples[i].split()[3].replace(',','.')), int(samples[i].split()[4].replace(',','.'))]
+        new_data = [int(sample.split()[2].replace(',','.')), int(sample.split()[3].replace(',','.')), int(sample.split()[4].replace(',','.'))]
         sample_jsonX = {"stream_type" : "E4_Acc_X", "Value" : new_data[0], "dateTime" : new_timestamp, "dateTime_Unix" : new_timestamp_unix, "Session_ID" : session_ID, "Participant" : participant, "Participant_ID" : participant_ID}
         sample_jsonY = {"stream_type" : "E4_Acc_Y", "Value" : new_data[1], "dateTime" : new_timestamp, "dateTime_Unix" : new_timestamp_unix, "Session_ID" : session_ID, "Participant" : participant, "Participant_ID" : participant_ID}
         sample_jsonZ = {"stream_type" : "E4_Acc_Z", "Value" : new_data[2], "dateTime" : new_timestamp, "dateTime_Unix" : new_timestamp_unix, "Session_ID" : session_ID, "Participant" : participant, "Participant_ID" : participant_ID}
@@ -137,9 +137,9 @@ eventhub_name = 'eventhub'
 client = EventHubProducerClient.from_connection_string(os.environ.get('AZURE_EVENTHUB_CONNECTION_STRING'), eventhub_name=eventhub_name)
 
 
-def stream():
+def stream(participant, participant_ID, session_ID):
     response = s.recv(bufferSize).decode("utf-8")
-    #print(response)
+    print(response)
     #print('Data streaming in progress')
     if "connection lost to device" in response:
         print(response.decode("utf-8"))
@@ -148,12 +148,13 @@ def stream():
     #print(samples)
     event_data_batch = client.create_batch()
     samples = response.split("\r\n")
-    for i in range(len(samples)-1):
-        sample_json = convert_to_json(samples[i])
-        #print(sample_json)
-        event_data_batch.add(EventData(sample_json))
+    for sample in samples:
+        if sample[0:2] == "E4":
+            sample_json = convert_to_json(sample, participant, participant_ID, session_ID)
+            print(sample_json)
+            event_data_batch.add(EventData(sample_json))
     client.send_batch(event_data_batch)
-    print("Data streaming in progress")
+    #print("Data streaming in progress")
 
 def unsubscribe_to_data():
     global acc, bvp, gsr, tmp, ibi, bat, tag
