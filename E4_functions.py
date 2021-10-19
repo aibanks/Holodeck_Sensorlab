@@ -139,7 +139,7 @@ client = EventHubProducerClient.from_connection_string(os.environ.get('AZURE_EVE
 
 def stream(participant, participant_ID, session_ID):
     response = s.recv(bufferSize).decode("utf-8")
-    print(response)
+    #print(response)
     #print('Data streaming in progress')
     if "connection lost to device" in response:
         print(response.decode("utf-8"))
@@ -149,7 +149,7 @@ def stream(participant, participant_ID, session_ID):
     event_data_batch = client.create_batch()
     samples = response.split("\r\n")
     for sample in samples:
-        if sample[0:2] == "E4":
+        if sample[0:2] == "E4" and len(sample.split()) >= 3:
             sample_json = convert_to_json(sample, participant, participant_ID, session_ID)
             print(sample_json)
             event_data_batch.add(EventData(sample_json))

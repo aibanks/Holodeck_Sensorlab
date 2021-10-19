@@ -272,6 +272,7 @@ class Example(QWidget):
 
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
+        #vbox.addLayout(datastreams_chkbx)
 
         #self.setFixedWidth(1500)
         #self.setFixedHeight(500)
