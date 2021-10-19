@@ -14,9 +14,6 @@ import os
 import time
 from random import randint
 
-#import E4_functions as Empatica_E4
-
-
 class ReadingThread(QtCore.QObject):
 
     output = QtCore.pyqtSignal(object)
@@ -37,6 +34,8 @@ class ReadingThread(QtCore.QObject):
 
     def _polling_routine(self):
         # this is what's inside of your while loop i.e. your repetitive task
+        # have the main streaming function in any sensor's imported .py file be titled "stream"
+        # and have parameters for participant name, participant ID, and session ID
         #outstring = "test"
         #self.output.emit(outstring)
         self.device.stream(self.metadata['ParticipantName'], 
